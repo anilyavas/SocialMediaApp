@@ -1,31 +1,66 @@
-/* eslint-disable react/no-unstable-nested-components */
 import React, {useState} from 'react';
 import {
+  StatusBar,
   Pressable,
   SafeAreaView,
-  ScrollView,
   View,
   Text,
   FlatList,
 } from 'react-native';
+
+//Custom Components
 import Title from './components/Title/Title';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faEnvelope} from '@fortawesome/free-regular-svg-icons';
-import style from './assets/styles/main';
 import UserStory from './components/UserStory/UserStory';
 import UserPost from './components/UserPost/UserPost';
 
+//FontAwesome Icons
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {faEnvelope} from '@fortawesome/free-regular-svg-icons';
+
+//Style Imports
+import style from './assets/styles/main';
+import {scaleFontSize} from './assets/styles/scaling';
+import {NavigationContainer} from '@react-navigation/native';
+
 const App = () => {
+  //All of the items in our stories
   const data = [
-    {firstName: 'Joseph', id: 1},
-    {firstName: 'Angel', id: 2},
-    {firstName: 'White', id: 3},
-    {firstName: 'Olivier', id: 4},
-    {firstName: 'Nate', id: 5},
-    {firstName: 'Adam', id: 6},
-    {firstName: 'Sean', id: 7},
-    {firstName: 'Nicolas', id: 8},
-    {firstName: 'Frederic', id: 9},
+    {
+      firstName: 'Joseph',
+      id: 1,
+    },
+    {
+      firstName: 'Angel',
+      id: 2,
+    },
+    {
+      firstName: 'White',
+      id: 3,
+    },
+    {
+      firstName: 'Olivier',
+      id: 4,
+    },
+    {
+      firstName: 'Nata',
+      id: 5,
+    },
+    {
+      firstName: 'Adam',
+      id: 6,
+    },
+    {
+      firstName: 'Sean',
+      id: 7,
+    },
+    {
+      firstName: 'Nicolas',
+      id: 8,
+    },
+    {
+      firstName: 'Frederic',
+      id: 9,
+    },
   ];
   const posts = [
     {
@@ -40,7 +75,7 @@ const App = () => {
     {
       firstName: 'Jennifer',
       lastName: 'Wilkson',
-      location: 'Pandok Luengsir, Jawa Barat',
+      location: 'Pondok Leungsir, Jawa Barat',
       likes: 570,
       comments: 12,
       bookmarks: 60,
@@ -49,23 +84,23 @@ const App = () => {
     {
       firstName: 'Adam',
       lastName: 'Spera',
-      location: 'Boston, Massachussetts',
+      location: 'Boston, Massachusetts',
       likes: 100,
       comments: 8,
       bookmarks: 7,
       id: 3,
     },
     {
-      firstName: 'Anıl',
-      lastName: 'Yavaş',
-      location: 'Zonguldak, Turkey',
-      likes: 5000,
-      comments: 700,
-      bookmarks: 44,
+      firstName: 'Nata',
+      lastName: 'Vacheishvili',
+      location: 'New York, New York',
+      likes: 300,
+      comments: 18,
+      bookmarks: 17,
       id: 4,
     },
     {
-      firstName: 'Nicholas',
+      firstName: 'Nicolas',
       lastName: 'Namoradze',
       location: 'Berlin, Germany',
       likes: 1240,
@@ -74,105 +109,152 @@ const App = () => {
       id: 5,
     },
   ];
+  // Define page size constant for the number of items to be displayed per page
   const pageSize = 4;
   const pageSizePosts = 2;
+
+  // Define state variable for the current page number
+  // so that we know how many pages we have fetched already
   const [pageNumber, setPageNumber] = useState(1);
   const [postPageNumber, setPostPageNumber] = useState(1);
+
+  // Define state variable for the loading status of the flatlist,
+  // will be used when we'll be fetching data on scroll until we complete the fetch
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+
+  // Define state variable for the data to be rendered in the user story container
   const [renderedData, setRenderedData] = useState(data.slice(0, pageSize));
+
+  // Define state variable for the data to be rendered in the user posts container
   const [renderedDataPosts, setRenderedDataPosts] = useState(
     posts.slice(0, pageSizePosts),
   );
+
+  /**
+   * function that returns the data for the page to be fetched
+   * @param data - all the data
+   * @param pageNumber - page number to fetch
+   * @param pageSize - number of items to fetch for the page
+   * @param posts - boolean to determine if we're using pagination for posts or user stories
+   */
   const pagination = (data, pageNumber, pageSize, posts = false) => {
     let startIndex = (pageNumber - 1) * pageSize;
-    if (startIndex > data.length) {
+    //don't return the information that does not exist inside the data array
+    if (startIndex >= data.length) {
       return [];
     }
     if (!posts) {
+      //set the page number, to the page number that we wanted to fetch so that we have information
+      //about which page was the one that was last fetched
       setPageNumber(pageNumber);
     } else {
       setPostPageNumber(pageNumber);
     }
     return data.slice(startIndex, startIndex + pageSize);
   };
+
   return (
-    <SafeAreaView>
-      <View style={style.userPostContainer}>
+    <NavigationContainer>
+      {/* Use the SafeAreaView component to ensure content is displayed within
+      the safe area boundaries of the device */}
+      <SafeAreaView>
+        <StatusBar backgroundColor={'red'} barStyle={'dark-content'} />
+        {/* Use FlatList to display user stories */}
         <FlatList
-          ListHeaderComponent={() => {
-            return (
-              <>
-                <View style={style.header}>
-                  <Title title={"Let's Explore"} />
-                  <Pressable style={style.messageIcon}>
-                    <FontAwesomeIcon
-                      icon={faEnvelope}
-                      color={'#CACDDE'}
-                      size={20}
-                    />
-                    <View style={style.messageNumberContainer}>
-                      <Text style={style.messageNumber}>2</Text>
-                    </View>
-                  </Pressable>
-                </View>
-                <View style={style.userStoryContainer}>
-                  <FlatList
-                    ListHeaderComponent={() => {
-                      return <></>;
-                    }}
-                    onMomentumScrollBegin={() => setIsLoading(false)}
-                    onEndReachedThreshold={0.5}
-                    keyExtractor={item => item.id.toString()}
-                    onEndReached={() => {
-                      if (!isLoading) {
-                        setIsLoading(true);
-                        setRenderedData(prev => [
-                          ...prev,
-                          ...pagination(data, pageNumber + 1, pageSize),
-                        ]);
-                        setIsLoading(false);
-                      }
-                    }}
-                    showsHorizontalScrollIndicator={false}
-                    horizontal={true}
-                    data={renderedData}
-                    renderItem={({item}) => (
-                      <UserStory firstName={item.firstName} />
-                    )}
+          ListHeaderComponent={
+            <>
+              {/* Use View to create a container for title and icon */}
+              <View style={style.header}>
+                {/* Use custom Title component to display the title */}
+                <Title title={"Let's Explore"} />
+                {/* Use Pressable to create a clickable component */}
+                <Pressable style={style.messageIcon}>
+                  {/* Use FontAwesomeIcon component to display an icon from FontAwesome icon set */}
+                  <FontAwesomeIcon
+                    icon={faEnvelope}
+                    color={'#CACDDE'}
+                    size={scaleFontSize(20)}
                   />
-                </View>
-              </>
-            );
-          }}
+                  {/* Use View to create a container for message number */}
+                  <View style={style.messageNumberContainer}>
+                    {/* Use Text to display the number of messages */}
+                    <Text style={style.messageNumber}>2</Text>
+                  </View>
+                </Pressable>
+              </View>
+              {/* Use View to create a container for the user stories */}
+              <View style={style.userStoryContainer}>
+                {/* Use FlatList to display user stories */}
+                <FlatList
+                  onMomentumScrollBegin={() => setIsLoadingPosts(false)}
+                  //when the user scrolls through half of the data call onEndReached function
+                  onEndReachedThreshold={0.5}
+                  keyExtractor={item => item.id.toString()}
+                  onEndReached={() => {
+                    //if we are not already in the middle of fetching data then fetch the data
+                    if (!isLoading) {
+                      //set is loading to true because we just started fetching data
+                      setIsLoading(true);
+                      setRenderedData(prev => [
+                        ...prev,
+                        ...pagination(data, pageNumber + 1, pageSize),
+                      ]);
+                      //after updating rendered data we have to set is loading to false, because we loaded the data we needed
+                      setIsLoading(false);
+                    }
+                  }}
+                  // Hide horizontal scroll indicator
+                  showsHorizontalScrollIndicator={false}
+                  // Set FlatList to display horizontally
+                  horizontal={true}
+                  // Pass in data to be rendered in FlatList
+                  data={renderedData}
+                  // Define how each item should be rendered
+                  renderItem={({item}) => (
+                    <UserStory firstName={item.firstName} />
+                  )}
+                />
+              </View>
+            </>
+          }
+          //when the user scrolls through half of the data call onEndReached function
           onMomentumScrollBegin={() => setIsLoadingPosts(false)}
           onEndReachedThreshold={0.5}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.id.toString() + 'post'}
           onEndReached={() => {
-            if (!isLoading) {
+            //if we are not already in the middle of fetching data then fetch the data
+            if (!isLoadingPosts) {
+              //set is loading to true because we just started fetching data
               setIsLoadingPosts(true);
               setRenderedDataPosts(prev => [
                 ...prev,
                 ...pagination(posts, postPageNumber + 1, pageSizePosts, true),
               ]);
+              //after updating rendered data we have to set is loading to false, because we loaded the data we needed
               setIsLoadingPosts(false);
             }
           }}
+          // Hide vertical scroll indicator
           showsVerticalScrollIndicator={false}
+          // Pass in data to be rendered in FlatList
           data={renderedDataPosts}
+          // Define how each item should be rendered
           renderItem={({item}) => (
-            <UserPost
-              firstName={item.firstName}
-              lastName={item.lastName}
-              comments={item.comments}
-              likes={item.likes}
-              bookmarks={item.bookmarks}
-              location={item.location}
-            />
+            <View style={style.userPostContainer}>
+              <UserPost
+                firstName={item.firstName}
+                lastName={item.lastName}
+                comments={item.comments}
+                likes={item.likes}
+                bookmarks={item.bookmarks}
+                location={item.location}
+              />
+            </View>
           )}
         />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </NavigationContainer>
   );
 };
 
